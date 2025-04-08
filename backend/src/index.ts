@@ -1,17 +1,27 @@
 import express from "express";
 import { Request, Response } from "express";
 import cors from "cors";
+import OpenAI from "openai";
+import dotenv from "dotenv";
 
-const app = express();
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
+
+const app = express();
+const client = new OpenAI({ apiKey: process.env.OpenAI });
 
 app.use(cors());
 app.use(express.json());
 
-app.post("/create", (req: Request, res: Response) => {
+app.post("/create", async (req: Request, res: Response) => {
   const msg = req.body.msg;
-  res.json({ msg: msg });
+
+  const response = await client.responses.create({
+    model: "gpt-4o",
+    input: msg,
+  });
+  res.json({ output: response.output_text });
 });
 
 app.listen(PORT, () => {
